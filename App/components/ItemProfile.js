@@ -14,19 +14,22 @@ import {
   Button 
 } from 'react-native-elements';
 import MapView from 'react-native-maps';
-// const binType = (color) => {
-//   //refine as needed
-//   let type, icon;
-//   switch (color) {
-//   case 'blue': type = 'Recycle', icon = 'http://www.recycling.com/wp-content/uploads/2016/06/recycling-symbol-icon-twotone-dark-blue.png';
-//     break;
-//   case 'green': type = 'Compost', icon = 'http://www.recycling.com/wp-content/uploads/2016/06/recycling-symbol-icon-twotone-dark-green.png';
-//     break;
-//   case 'black': type = 'Waste', icon = 'http://www.recycling.com/wp-content/uploads/2016/06/recycling-symbol-icon-twotone-black.png';
-//     break;    
-//   }
-//   return [type, icon];
-// };
+import { GOOGLE_GEOCODE_KEY } from 'react-native-dotenv';
+
+const binType = (color) => {
+  //refine as needed
+  let type, icon;
+  switch (color) {
+  case 'recycle_bin': type = 'Recycle', icon = 'http://www.recycling.com/wp-content/uploads/2016/06/recycling-symbol-icon-twotone-dark-blue.png';
+    break;
+  case 'compost': type = 'Compost', icon = 'http://www.recycling.com/wp-content/uploads/2016/06/recycling-symbol-icon-twotone-dark-green.png';
+    break;
+  case 'landfill': type = 'Landfill', icon = 'http://www.recycling.com/wp-content/uploads/2016/06/recycling-symbol-icon-twotone-black.png';
+    break;    
+  case 'recyclable_elsewhere': type = 'Recyclable elsewhere', icon = 'https://cdn4.iconfinder.com/data/icons/recycle-and-environment-vol-2/600/home-Building-estate-house-Conservation-green-recycle-recycling-Ecology-environment-packaging-512.png'
+  }
+  return icon;
+};
 
 const styles = StyleSheet.create({
   tableCell: {
@@ -63,7 +66,7 @@ export default class Profile extends Component {
   
   componentDidMount() {
     navigator.geolocation.getCurrentPosition(({ coords }) => {
-      fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${coords.latitude},${coords.longitude}&key=${process.env.GOOGLE_GEOCODE_KEY}`)
+      fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${coords.latitude},${coords.longitude}&key=${GOOGLE_GEOCODE_KEY}`)
         .then((response) => response.json())
         .then(({ results }) => {
           this.setState({ mapLocation: results[0].formatted_address });
@@ -81,7 +84,7 @@ export default class Profile extends Component {
   }
   
   relocateMap(address) {
-    fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${address.replace(/ /g, '+')}&key=${process.env.GOOGLE_GEOCODE_KEY}`)
+    fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${address.replace(/ /g, '+')}&key=${GOOGLE_GEOCODE_KEY}`)
       .then((response) => response.json())
       .then(({ results }) => {
         console.log(results);
@@ -140,7 +143,8 @@ export default class Profile extends Component {
         <View style={{ flexDirection: 'row' }}>
           <View style={[styles.tableCell, { height: 100, width: '50%', alignItems: 'center' }]}>
             {/* <Image style={{ height: 70, width: 70 }} source={{ uri: binType(item.bin)[1] }} /> */}
-            {/* <Text>{binType(item.bin)[0]}</Text> */}
+            <Image style={{ height: 70, width: 70 }} source={{uri:binType(this.props.currentProfile.instruction)}} />
+            <Text>{this.props.currentProfile.instruction}</Text>
           </View>
           <View style={[styles.tableCell, { height: 100, width: '50%', alignItems: 'center' }]}>
             <MapView style={styles.map} region={this.state.region} />
@@ -151,7 +155,7 @@ export default class Profile extends Component {
         </View>      
         <View style={ styles.tableCell }>
           {/* <Text>Material type: {item.material}</Text> */}
-          <Text>Material type</Text>
+          <Text>Material type: {this.props.currentProfile.material}</Text>
         </View>
         <View style={ styles.tableCell }>
           <Text>Top Comments</Text>
